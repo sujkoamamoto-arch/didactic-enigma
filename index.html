@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -97,7 +98,7 @@
         aside { background: var(--panel-bg-light); border-right: 1px solid var(--border-light); padding: 20px 10px; display: flex; flex-direction: column; gap: 8px; }
         .menu-link { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: var(--text-muted-dark); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 500; transition: all 0.2s; }
         .menu-link:hover, .menu-link.active { background: rgba(0, 170, 255, 0.1); color: var(--vtb-blue); }
-        main { padding: 0; overflow-y: auto; background-color: var(--bg-light); display: flex; flex-direction: column; } /* Убрал отступ, чтобы чат занимал всю ширину */
+        main { padding: 0; overflow-y: auto; background-color: var(--bg-light); display: flex; flex-direction: column; }
 
         /* 💬 ЧАТ (КАНАЛЫ / DM) */
         .chat-container { display: grid; grid-template-rows: auto 1fr auto; height: 100%; background: var(--panel-bg-light); border-radius: 16px; border: 1px solid var(--border-light); overflow: hidden; }
@@ -138,7 +139,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="auth-bg"> <!-- Начальный фон для авторизации -->
+<body class="auth-bg">
 
     <!-- 🔮 SPLASH SCREEN -->
     <div id="splashScreen">
@@ -237,7 +238,7 @@
                     <div class="profile-container">
                         <img id="profilePic" class="profile-avatar" src="https://i.ibb.co/C5fL36t/default-avatar.png">
                         <h2 id="profileUsername" class="profile-name">Загрузка...</h2>
-                        <div id="profileUserId" class="profile-id"></div> <!-- Здесь будет @юз -->
+                        <div id="profileUserId" class="profile-id"></div>
                         <div id="profileRole" class="profile-role">Пользователь</div>
                         <div style="font-size: 13px; color: var(--text-muted-dark);" id="profileEmailBadge">Почта не привязана</div>
                         <p id="profileBio" class="profile-bio"></p>
@@ -302,7 +303,6 @@
     </div>
 
     <script>
-        // ТВОИ ЛИЧНЫЕ ДАННЫЕ ИЗ FIREBASE:
         const firebaseConfig = {
             apiKey: "AIzaSyC231mo3eIVzjWvd3ocs9P_V_F6kxFDBO4",
             authDomain: "gf656445.firebaseapp.com",
@@ -314,7 +314,6 @@
             measurementId: "G-NDL5R5KQKR"
         };
 
-        // Инициализируем Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -324,15 +323,13 @@
         let isRegister = false;
         let failedLoginAttempts = 0;
         let loginBlockTimer = false;
-        let currentChannelId = "common"; // Активный канал по умолчанию
+        let currentChannelId = "common";
 
-        const DAY_IN_MS = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+        const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-        // Проверяем подключение к базе данных
         const connectedRef = database.ref(".info/connected");
         connectedRef.on("value", (snap) => {
             if (snap.val() === true) {
-                // Если есть текущий пользователь (запомнили с прошлой сессии), сразу логиним его
                 if (localStorage.getItem('lastLoginUser')) {
                     const lastUser = JSON.parse(localStorage.getItem('lastLoginUser'));
                     currentUser = lastUser.username;
@@ -343,7 +340,7 @@
                     setTimeout(() => {
                         document.getElementById('splashScreen').style.display = 'none';
                         document.getElementById('authScreen').style.display = 'block';
-                        document.body.style.backgroundImage = 'var(--auth-bg-image)'; // Фон для авторизации
+                        document.body.style.backgroundImage = 'var(--auth-bg-image)';
                     }, 800);
                 }
                 addLog("Успешное подключение к облачной базе данных Firebase Realtime Database.");
@@ -352,7 +349,6 @@
             }
         });
 
-        // Защита от XSS
         function cleanText(text) {
             const temp = document.createElement('div');
             temp.innerText = text;
@@ -361,7 +357,7 @@
 
         function addLog(message) {
             const logBox = document.getElementById('securityLogs');
-            if (logBox) { // Проверяем, существует ли logBox (виден только админам)
+            if (logBox) {
                 const time = new Date().toLocaleTimeString();
                 logBox.innerHTML += `<p style="color: ${message.includes('DDoS') || message.includes('Неудачная попытка') ? '#ff5555' : 'var(--sber-green)'}">[${time}] ${cleanText(message)}</p>`;
                 logBox.scrollTop = logBox.scrollHeight;
@@ -376,7 +372,6 @@
             document.getElementById('toggleText').innerText = isRegister ? "Уже есть аккаунт? Войти" : "Создать новый аккаунт";
         }
 
-        // Авторизация и регистрация через Firebase
         function handleAuth(event) {
             event.preventDefault();
             if (loginBlockTimer) return;
@@ -402,13 +397,12 @@
                         errorBox.style.display = "block";
                         return;
                     }
-                    // Роль по умолчанию - user, но для Sasha_Fetisov - super_admin
                     const role = (username === "Sasha_Fetisov") ? "super_admin" : "user";
                     const newUser = {
                         username: username,
                         password: passwordInput,
                         email: emailInput || "Не привязана",
-                        avatar: "https://i.ibb.co/C5fL36t/default-avatar.png", // Дефолтная аватарка
+                        avatar: "https://i.ibb.co/C5fL36t/default-avatar.png",
                         musicUrl: "",
                         bio: "Новый пользователь портала.",
                         role: role
@@ -426,13 +420,13 @@
                         failedLoginAttempts = 0;
                         localStorage.setItem('lastLoginUser', JSON.stringify({username: currentUser, role: currentUserRole}));
                         loginSuccess();
-                        addLog(`Пользователь ${currentUser} (${currentUserRole}) успешно авторизован в системе.`);
+                        addLog(`Пользователь ${currentUser} (${currentUserRole}) успешно авторизован.`);
                     } else {
                         failedLoginAttempts++;
                         addLog(`Неудачная попытка входа под именем: ${username}`);
                         if (failedLoginAttempts >= 3) {
                             loginBlockTimer = true;
-                            errorBox.innerText = "СИСТЕМА ЗАБЛОКИРОВАНА на 30 секунд за подбор паролей!";
+                            errorBox.innerText = "СИСТЕМА ЗАБЛОКИРОВАНА на 30 секунд!";
                             errorBox.style.display = "block";
                             document.getElementById('authBtn').disabled = true;
                             setTimeout(() => {
@@ -455,8 +449,8 @@
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainInterface').style.display = 'flex';
             document.getElementById('currentUserLabel').innerText = currentUser;
-            document.body.style.backgroundImage = 'var(--main-bg-image)'; // Фон для основного интерфейса
-            document.body.classList.remove('auth-bg'); // Убираем класс для фона авторизации
+            document.body.style.backgroundImage = 'var(--main-bg-image)';
+            document.body.classList.remove('auth-bg');
             
             if (currentUserRole === 'super_admin') {
                 document.getElementById('tab-btn-admin').style.display = 'flex';
@@ -464,28 +458,27 @@
                 document.getElementById('tab-btn-admin').style.display = 'none';
             }
 
-            switchTab('channels'); // По умолчанию открываем каналы
-            loadProfileData(); // Загружаем данные профиля
-            listenToChannels(); // Начинаем слушать каналы
+            switchTab('channels');
+            loadProfileData();
+            listenToChannels();
         }
 
         function logout() {
             addLog(`Пользователь ${currentUser} покинул систему.`);
             currentUser = null;
             currentUserRole = "user";
-            localStorage.removeItem('lastLoginUser'); // Удаляем данные о последнем входе
+            localStorage.removeItem('lastLoginUser');
             document.getElementById('mainInterface').style.display = 'none';
             document.getElementById('authScreen').style.display = 'block';
-            document.body.style.backgroundImage = 'var(--auth-bg-image)'; // Возвращаем фон для авторизации
+            document.body.style.backgroundImage = 'var(--auth-bg-image)';
             document.getElementById('bgMusicPlayer').pause();
             document.getElementById('bgMusicPlayer').src = "";
             document.getElementById('bgMusicPlayer').style.display = 'none';
-            // Сброс полей формы
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
-            document.getElementById('authError').style.display = 'none'; // Скрываем ошибки
-            isRegister = false; // Возвращаем форму в режим входа
-            toggleAuth(); // Обновляем текст кнопки/заголовка
+            document.getElementById('authError').style.display = 'none';
+            isRegister = false;
+            toggleAuth();
         }
 
         function switchTab(tabName) {
@@ -504,56 +497,50 @@
                  activeLinkElement.classList.add('active');
             }
            
-            if (tabName === 'channels') {
-                // Слушатель listenToChannels уже обновляет currentChannelId и рендерит
-            }
             if (tabName === 'dm') {
                 if (activeDMTarget) {
                     document.getElementById('dmSearchBlock').style.display = 'none';
                     document.getElementById('dmChatBlock').style.display = 'grid';
-                    listenToDMs(); // Переподключаем слушателя на активный чат
+                    listenToDMs();
                 } else {
                     document.getElementById('dmSearchBlock').style.display = 'block';
                     document.getElementById('dmChatBlock').style.display = 'none';
-                    document.getElementById('dmMsgBox').innerHTML = ''; // Очищаем чат при закрытии
+                    document.getElementById('dmMsgBox').innerHTML = '';
                 }
             }
             if (tabName === 'profile') loadProfileData();
             if (tabName === 'admin') updateAdminPanel();
         }
 
-        // --- ГЕНЕРИЧЕСКАЯ ФУНКЦИЯ ДЛЯ ОТОБРАЖЕНИЯ СООБЩЕНИЙ ---
         function renderMessagesToBox(msgBoxId, messagesData) {
             const msgBox = document.getElementById(msgBoxId);
             msgBox.innerHTML = '';
             if (!messagesData) return;
 
             const now = Date.now();
-            const messages = Object.values(messagesData); // Преобразуем объект сообщений в массив
+            const messages = Object.values(messagesData);
 
             messages.forEach(msg => {
-                // ПРОВЕРКА ВРЕМЕНИ: если сообщению больше 24 часов, не отображаем его
                 const messageCreationTime = msg.createdAt || 0; 
                 if (messageCreationTime && (now - messageCreationTime > DAY_IN_MS)) {
-                    return; // Пропускаем отрисовку старых сообщений
+                    return;
                 }
 
                 const isMy = msg.sender === currentUser;
                 let contentHTML = '';
 
-                // Определение картинок, видео или стикеров/эмодзи по ссылке/тексту
                 const imageUrlMatch = msg.text.match(/(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp))/i);
                 const videoUrlMatch = msg.text.match(/(https?:\/\/[^\s]+\.(?:mp4|webm))/i);
-                const stickerEmojiMatch = msg.text.match(/^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]{1,3}$/u); // до 3 эмодзи подряд как стикер
+                const stickerEmojiMatch = msg.text.match(/^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]{1,3}$/u);
 
                 if (imageUrlMatch) {
                     contentHTML = `<img src="${imageUrlMatch[0]}" alt="Image" class="chat-file-preview">`;
                 } else if (videoUrlMatch) {
                     contentHTML = `<video src="${videoUrlMatch[0]}" controls class="chat-file-preview"></video>`;
-                } else if (stickerEmojiMatch && msg.text.length <= 10) { // если короткий текст и это эмодзи
+                } else if (stickerEmojiMatch && msg.text.length <= 10) {
                     contentHTML = `<div class="sticker-emoji">${msg.text}</div>`;
                 } else {
-                    contentHTML = `<div>${cleanText(msg.text)}</div>`; // Используем cleanText для обычного текста
+                    contentHTML = `<div>${cleanText(msg.text)}</div>`;
                 }
 
                 msgBox.innerHTML += `
@@ -566,13 +553,11 @@
             msgBox.scrollTop = msgBox.scrollHeight;
         }
 
-        // 💬 КАНАЛЫ (БАЗА FIREBASE В РЕАЛЬНОМ ВРЕМЕНИ)
         function listenToChannels() {
             database.ref('channels').on('value', (snapshot) => {
                 const channels = snapshot.val();
                 const asideMenu = document.getElementById('asideMenu');
                 
-                // Удаляем старые динамические ссылки на каналы, кроме базовых
                 document.querySelectorAll('.channel-link-dynamic').forEach(el => el.remove());
 
                 if (channels) {
@@ -581,15 +566,14 @@
                         const link = document.createElement('a');
                         link.href = "#";
                         link.className = `menu-link channel-link-dynamic ${id === currentChannelId ? 'active' : ''}`;
-                        link.innerHTML = `<span>#${cleanText(channel.name)}</span>`; // Имя канала тоже очищаем
+                        link.innerHTML = `<span>#${cleanText(channel.name)}</span>`;
                         link.onclick = (e) => {
                             e.preventDefault();
                             currentChannelId = id;
                             document.getElementById('activeChannelName').innerText = `#${cleanText(channel.name)}`;
-                            renderMessagesToBox('channelMsgBox', channel.messages); // Используем универсальный рендер
-                            switchTab('channels'); // Убедиться, что вкладка каналов активна
+                            renderMessagesToBox('channelMsgBox', channel.messages);
+                            switchTab('channels');
                         };
-                        // Вставляем новый канал перед ссылкой на DM
                         const dmLink = document.getElementById('tab-btn-dm');
                         if (dmLink) {
                             asideMenu.insertBefore(link, dmLink);
@@ -598,10 +582,9 @@
                         }
                     });
                 }
-                // Рендерим сообщения для текущего активного канала
                 if (channels && channels[currentChannelId]) {
                     renderMessagesToBox('channelMsgBox', channels[currentChannelId].messages);
-                } else if (channels && Object.keys(channels).length > 0) { // Если текущего канала нет, выбираем первый
+                } else if (channels && Object.keys(channels).length > 0) {
                     currentChannelId = Object.keys(channels)[0];
                     document.getElementById('activeChannelName').innerText = `#${cleanText(channels[currentChannelId].name)}`;
                     renderMessagesToBox('channelMsgBox', channels[currentChannelId].messages);
@@ -616,7 +599,7 @@
             const time = new Date().toLocaleTimeString();
             database.ref(`channels/${currentChannelId}/messages`).push({
                 sender: currentUser,
-                text: text, // cleanText уже внутри renderMessagesToBox, здесь можно без
+                text: text,
                 timestamp: time,
                 createdAt: Date.now()
             });
@@ -626,8 +609,8 @@
         function createNewChannel() {
             const name = prompt("Введите имя нового канала (только английские буквы и цифры, без пробелов):");
             if (!name || name.trim() === '') return;
-            const cleanedId = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, ''); // Только буквы и цифры для ID
-            if (cleanedId === '') { alert("Имя канала не может быть пустым или содержать только спецсимволы."); return; }
+            const cleanedId = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+            if (cleanedId === '') { alert("Недопустимое имя."); return; }
 
             database.ref(`channels`).once('value').then(snapshot => {
                 const existingChannels = snapshot.val();
@@ -637,7 +620,7 @@
                 }
 
                 database.ref(`channels/${cleanedId}`).set({
-                    name: name.trim(), // Имя в чате будет таким, как ввели
+                    name: name.trim(),
                     messages: {
                         first: { sender: "System", text: `Канал #${cleanText(name.trim())} успешно создан в облаке!`, timestamp: "Система", createdAt: Date.now() }
                     }
@@ -646,8 +629,6 @@
             });
         }
 
-
-        // ✉️ ЛИЧНЫЕ СООБЩЕНИЯ (FIREBASE)
         function listenToDMs() {
             database.ref('dms').on('value', (snapshot) => {
                 if (!activeDMTarget || !currentUser) return;
@@ -688,7 +669,7 @@
                     document.getElementById('dmTargetName').innerText = `Чат с @${cleanText(target)}`;
                     listenToDMs();
                 } else {
-                    alert(`Пользователь с ником "${cleanText(target)}" не зарегистрирован в базе!`);
+                    alert(`Пользователь с ником "${cleanText(target)}" не найден!`);
                 }
             });
         }
@@ -698,9 +679,8 @@
             document.getElementById('dmChatBlock').style.display = 'none';
             document.getElementById('dmSearchBlock').style.display = 'block';
             document.getElementById('searchUserField').value = '';
-            database.ref('dms').off('value', listenToDMs); // Отключаем слушатель DM
+            database.ref('dms').off('value', listenToDMs);
         }
-
 
         function sendDirectMessage() {
             const text = document.getElementById('dmInput').value.trim();
@@ -710,21 +690,19 @@
             database.ref('dms').push({
                 sender: currentUser,
                 receiver: activeDMTarget,
-                text: text, // cleanText уже внутри renderMessagesToBox, здесь можно без
+                text: text,
                 timestamp: time,
                 createdAt: Date.now()
             });
             document.getElementById('dmInput').value = '';
         }
 
-
-        // 👤 ПРОФИЛЬ
         function loadProfileData() {
             database.ref('users/' + currentUser).once('value').then(snap => {
                 const user = snap.val();
                 if (user) {
                     document.getElementById('profileUsername').innerText = cleanText(user.username);
-                    document.getElementById('profileUserId').innerText = `@${cleanText(user.username)}`; // ID под ником
+                    document.getElementById('profileUserId').innerText = `@${cleanText(user.username)}`;
                     document.getElementById('profilePic').src = user.avatar || "https://i.ibb.co/C5fL36t/default-avatar.png";
                     document.getElementById('profileBio').innerText = cleanText(user.bio || "Пользователь пока ничего о себе не рассказал.");
                     document.getElementById('profileRole').innerText = user.role === "super_admin" ? "СуперАдмин" : (user.role === "admin" ? "Администратор" : "Пользователь");
@@ -733,7 +711,6 @@
                     document.getElementById('bioInput').value = user.bio || "";
                     document.getElementById('profileEmailInput').value = user.email && user.email !== "Не привязана" ? user.email : "";
                     
-                    // Обновляем бейдж почты
                     if (user.email && user.email !== "Не привязана") {
                         document.getElementById('profileEmailBadge').innerText = `Почта привязана: ${cleanText(user.email)}`;
                         document.getElementById('profileEmailBadge').style.color = 'var(--sber-green)';
@@ -748,11 +725,11 @@
                     if (user.musicUrl) {
                         player.src = user.musicUrl;
                         player.style.display = 'block';
-                        player.play().catch(e => console.log("Музыка ждет взаимодействия с сайтом."));
+                        player.play().catch(e => console.log("Музыка ждет взаимодействия."));
                     } else {
                         player.style.display = 'none';
                         player.pause();
-                        player.src = ""; // Очищаем источник, чтобы не было ошибки
+                        player.src = "";
                     }
                 }
             });
@@ -760,14 +737,14 @@
 
         function saveProfile() {
             const avatar = document.getElementById('avatarInput').value.trim();
-            const bio = document.getElementById('bioInput').value.trim(); // cleanText при сохранении в базу
+            const bio = document.getElementById('bioInput').value.trim();
             const email = document.getElementById('profileEmailInput').value.trim() || "Не привязана";
             const musicUrl = document.getElementById('musicUrlInput').value.trim();
 
             database.ref('users/' + currentUser).update({
                 avatar: avatar || "https://i.ibb.co/C5fL36t/default-avatar.png",
-                bio: cleanText(bio), // Очистка при записи
-                email: cleanText(email), // Очистка при записи
+                bio: cleanText(bio),
+                email: cleanText(email),
                 musicUrl: musicUrl
             });
             alert("Ваш профиль обновлен в облаке!");
@@ -775,9 +752,8 @@
             loadProfileData();
         }
 
-        // 🛡️ АДМИНКА (УПРАВЛЕНИЕ РОЛЯМИ)
         function updateAdminPanel() {
-            database.ref('users').on('value', (snapshot) => { // Слушаем изменения в пользователях
+            database.ref('users').on('value', (snapshot) => {
                 const users = snapshot.val();
                 const tableBody = document.getElementById('adminUsersTableBody');
                 tableBody.innerHTML = '';
@@ -809,7 +785,7 @@
                 alert("У вас нет прав для изменения ролей!");
                 return;
             }
-             if (username === currentUser) {
+            if (username === currentUser) {
                 alert("Нельзя изменить свою собственную роль!");
                 return;
             }
